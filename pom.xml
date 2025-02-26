@@ -11,6 +11,8 @@
 		<maven.compiler.target>17</maven.compiler.target>
 		<keycloak.version>25.0.5</keycloak.version>
 		<kafka.version>3.8.0</kafka.version>
+		<aws-msk-iam-auth.version>2.1.0</aws-msk-iam-auth.version>
+		<fasterxml-jackson-core.version>2.18.2</fasterxml-jackson-core.version>
 		<confluent.version>7.5.0</confluent.version>
 		<junit.version>5.11.0</junit.version>
 		<jboss-logging.version>3.6.1.Final</jboss-logging.version>
@@ -54,6 +56,18 @@
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>software.amazon.msk</groupId>
+			<artifactId>aws-msk-iam-auth</artifactId>
+			<version>${aws-msk-iam-auth.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${fasterxml-jackson-core.version}</version>
 		</dependency>
 
 		<dependency>
