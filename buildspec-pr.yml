@@ -1,13 +1,19 @@
 version: 0.2
+cache:
+  paths:
+    - '/root/.m2/**/*'
 phases:
+  install:
+    runtime-versions:
+      java: corretto17
   build:
     commands:
       - echo "Commit ID:" $CODEBUILD_RESOLVED_SOURCE_VERSION
-      - echo Deploying Keycloak Kafka Custom jar...
+      - echo Deploying Deploying Keycloak Kafka Custom jar...
       - echo $CODEBUILD_WEBHOOK_HEAD_REF
       - git config --global user.email "codebuild@bluewhite.co"
       - git config --global user.name "Code Build"
       - git checkout $CODEBUILD_WEBHOOK_HEAD_REF
-      - git merge master
+      - git merge master --allow-unrelated-histories
       - echo $SETTINGS > settings.xml
-      - mvn package -s settings.xml
+      - mvn install -s settings.xml
