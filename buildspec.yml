@@ -5,7 +5,7 @@ cache:
 phases:
   install:
     runtime-versions:
-      java: corretto17
+      java: corretto21
   build:
     commands:
       - echo Deploying Keycloak Kafka Custom jar...

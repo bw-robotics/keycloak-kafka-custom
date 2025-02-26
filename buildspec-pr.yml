@@ -5,7 +5,7 @@ cache:
 phases:
   install:
     runtime-versions:
-      java: corretto17
+      java: corretto21
   build:
     commands:
       - echo "Commit ID:" $CODEBUILD_RESOLVED_SOURCE_VERSION
