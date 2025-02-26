@@ -1,0 +1,13 @@
+version: 0.2
+phases:
+  build:
+    commands:
+      - echo "Commit ID:" $CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo Deploying Keycloak Kafka Custom jar...
+      - echo $CODEBUILD_WEBHOOK_HEAD_REF
+      - git config --global user.email "codebuild@bluewhite.co"
+      - git config --global user.name "Code Build"
+      - git checkout $CODEBUILD_WEBHOOK_HEAD_REF
+      - git merge master
+      - echo $SETTINGS > settings.xml
+      - mvn package -s settings.xml
