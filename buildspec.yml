@@ -10,4 +10,8 @@ phases:
     commands:
       - echo Deploying Keycloak Kafka Custom jar...
       - echo $SETTINGS > settings.xml
+      - wget "https://bwrrepo.jfrog.io/artifactory/default-maven-local/com/bwr/keycloak-kafka/1.2.0/keycloak-kafka-1.2.0-jar-with-dependencies.jar"
+      - docker buildx build --provenance=false --platform linux/amd64,linux/arm64 \
+        --push -t 381492305859.dkr.ecr.eu-west-1.amazonaws.com/cloud/keycloak-custom:kc-26.1.2-kafka-4 \
+        -f Dockerfile .
       - mvn deploy -s settings.xml
