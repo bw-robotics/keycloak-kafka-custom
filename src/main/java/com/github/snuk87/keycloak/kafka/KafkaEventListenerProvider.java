@@ -1,5 +1,9 @@
 package com.github.snuk87.keycloak.kafka;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +23,9 @@ import org.keycloak.events.admin.AdminEvent;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.keycloak.events.Details.NOT_BEFORE;
+import static org.keycloak.events.EventType.USER_DISABLED_BY_TEMPORARY_LOCKOUT;
 
 public class KafkaEventListenerProvider implements EventListenerProvider {
 
@@ -64,7 +71,11 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 	@Override
 	public void onEvent(Event event) {
-		if (events.contains(event.getType())) {
+		final EventType type = event.getType();
+		if (events.contains(type)) {
+			if (USER_DISABLED_BY_TEMPORARY_LOCKOUT.equals(type)) {
+				changeUnlockTimeType(event.getDetails());
+			}
 			try {
 				produceEvent(mapper.writeValueAsString(event), topicEvents);
 			} catch (JsonProcessingException | ExecutionException | TimeoutException e) {
@@ -74,6 +85,18 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 				Thread.currentThread().interrupt();
 			}
 		}
+	}
+
+	private void changeUnlockTimeType(Map<String, String> details) {
+		final String notBeforeString = details.get(NOT_BEFORE);
+
+		LocalDateTime localDateTime = LocalDateTime.parse(notBeforeString);
+		ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("UTC"));
+		final long epochMillis = zonedDateTime.toInstant().toEpochMilli();
+
+		LOG.info("EPOCH MILLIS: " + epochMillis);
+
+		details.put(NOT_BEFORE, Long.toString(epochMillis));
 	}
 
 	@Override
