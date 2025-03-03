@@ -6,7 +6,12 @@ phases:
   install:
     runtime-versions:
       java: corretto21
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 381492305859.dkr.ecr.eu-west-1.amazonaws.com
   build:
+    on-failure: ABORT
     commands:
       - echo Deploying Keycloak Kafka Custom jar...
       - echo $SETTINGS > settings.xml
@@ -47,3 +52,4 @@ phases:
       - docker buildx create --use
       - docker buildx build --platform linux/amd64,linux/arm64 --push -t ${REGISTRY}:${VERSION} -f Dockerfile .
       - mvn deploy -s settings.xml
+      -
