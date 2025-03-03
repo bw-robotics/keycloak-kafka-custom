@@ -42,7 +42,7 @@ phases:
         NEW_PATCH=$((CURRENT_PATCH + 1))
         export VERSION="$MAJOR_MINOR.$NEW_PATCH"
         echo "Building version $VERSION"
-      - wget "https://bwrrepo.jfrog.io/artifactory/default-maven-local/com/bwr/keycloak-kafka/1.2.0/keycloak-kafka-1.2.0-jar-with-dependencies.jar"
+      - wget --user=$JFROG_USER --password=$JFROG_ACCESS_KEY "https://bwrrepo.jfrog.io/artifactory/default-maven-local/com/bwr/keycloak-kafka/1.2.0/keycloak-kafka-1.2.0-jar-with-dependencies.jar"
       - docker buildx create --use
       - docker buildx build --platform linux/amd64,linux/arm64 --push -t ${REGISTRY}:${VERSION} -f Dockerfile .
       - mvn deploy -s settings.xml
