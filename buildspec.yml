@@ -11,7 +11,7 @@ phases:
       - echo Deploying Keycloak Kafka Custom jar...
       - echo $SETTINGS > settings.xml
       - |
-        VERSION=$(cat pom.xml | grep "^    <keycloak.version>.*</keycloak.version>$" | awk -F'[><]' '{print $3}')
+        VERSION=$(sed -n 's|.*<keycloak.version>\(.*\)</keycloak.version>.*|\1|p' pom.xml)
 
       - PROJECT_NAME=$(basename $CODEBUILD_SOURCE_REPO_URL .git)
 
