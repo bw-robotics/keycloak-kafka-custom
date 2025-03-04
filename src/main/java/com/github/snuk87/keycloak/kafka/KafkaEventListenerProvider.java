@@ -92,10 +92,8 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
 		LocalDateTime localDateTime = LocalDateTime.parse(notBeforeString);
 		ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of(ZoneId.systemDefault().getId()));
+
 		final long epochMillis = zonedDateTime.toInstant().toEpochMilli();
-
-		LOG.info("EPOCH MILLIS: " + epochMillis);
-
 		details.put(NOT_BEFORE, Long.toString(epochMillis));
 	}
 
