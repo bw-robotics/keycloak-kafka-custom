@@ -151,3 +151,20 @@ class KeycloakAdminEvent {
 ## Contribution
 
 Any kind of contributions are welcome.
+
+
+## Different Kafka clients per realm
+It is possible to run the jar with multiple kafka clients. In order to do that, 
+you need to export appropriate environment variables.
+### Example: 
+export KAFKA_REALMS_DEV_REALM_NAME="test-dev"\
+export KAFKA_REALMS_DEV_BOOTSTRAP_SERVERS="kafka-dev:9092"\
+export KAFKA_REALMS_DEV_CLIENT_ID="dev-client"
+
+export KAFKA_REALMS_QA_REALM_NAME="test-qa"\
+export KAFKA_REALMS_QA_BOOTSTRAP_SERVERS="kafka-qa:9092"\
+export KAFKA_REALMS_QA_CLIENT_ID="qa-client"
+
+This should create 2 different kafka clients, one for "test-dev" realm and one for "test-qa" realm. 
+It is important to know that "KAFKA_REALMS_" needs to be the PREFIX and that after that "realm name" should be represented with a single word.
+In our example that's "DEV" or "QA".
