@@ -115,18 +115,19 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
             }
 
             String realmKey = parts[0];  // This is the identifier (e.g., "DEV", "QA")
+            String property = parts[1];
 
             // Get the real realm name from realmNameMap
             String realmName = realmNameMap.getOrDefault(realmKey, realmKey.toLowerCase());
 
             KafkaRealmConfig config = configMap.getOrDefault(realmName, new KafkaRealmConfig());
 
-            if (BOOTSTRAP_SERVERS_VARIABLE.equals(parts[1])) {
+            if (BOOTSTRAP_SERVERS_VARIABLE.equals(property)) {
                 if (value == null) {
                     throw new NullPointerException("bootstrapServers must not be null");
                 }
                 config.setBootstrapServers(value);
-            } else if (CLIENT_ID_VARIABLE.equals(parts[1])) {
+            } else if (CLIENT_ID_VARIABLE.equals(property)) {
                 if (value == null) {
                     throw new NullPointerException("clientId must not be null");
                 }
