@@ -17,6 +17,8 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
     private static final Logger LOG = Logger.getLogger(KafkaEventListenerProviderFactory.class);
     private static final String ID = "kafka";
     private static final String PREFIX = "KAFKA_REALMS_";
+    private static final String BOOTSTRAP_SERVERS_VARIABLE = "BOOTSTRAP_SERVERS";
+    private static final String CLIENT_ID_VARIABLE = "CLIENT_ID";
 
     private KafkaEventListenerProvider instance;
 
@@ -107,22 +109,24 @@ public class KafkaEventListenerProviderFactory implements EventListenerProviderF
             if (key.endsWith("_REALM_NAME")) continue;
 
             String[] parts = key.substring(PREFIX.length()).split("_", 2);
-            if (parts.length < 2) continue;
+            if (parts.length < 2) {
+                LOG.warn("Invalid key: " + key + ", skipping...");
+                continue;
+            }
 
             String realmKey = parts[0];  // This is the identifier (e.g., "DEV", "QA")
-            String property = parts[1].toLowerCase().replace('_', '-'); // Convert to standard property format
 
             // Get the real realm name from realmNameMap
             String realmName = realmNameMap.getOrDefault(realmKey, realmKey.toLowerCase());
 
             KafkaRealmConfig config = configMap.getOrDefault(realmName, new KafkaRealmConfig());
 
-            if ("bootstrap-servers".equals(property)) {
+            if (BOOTSTRAP_SERVERS_VARIABLE.equals(parts[1])) {
                 if (value == null) {
                     throw new NullPointerException("bootstrapServers must not be null");
                 }
                 config.setBootstrapServers(value);
-            } else if ("client-id".equals(property)) {
+            } else if (CLIENT_ID_VARIABLE.equals(parts[1])) {
                 if (value == null) {
                     throw new NullPointerException("clientId must not be null");
                 }

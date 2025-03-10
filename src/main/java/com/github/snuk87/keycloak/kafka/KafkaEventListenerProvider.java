@@ -62,6 +62,43 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
         mapper = new ObjectMapper();
     }
 
+    @Override
+    public void onEvent(Event event) {
+        final EventType type = event.getType();
+        if (events.contains(type)) {
+            if (USER_DISABLED_BY_TEMPORARY_LOCKOUT.equals(type)) {
+                changeUnlockTimeType(event.getDetails());
+            }
+            try {
+                produceEvent(mapper.writeValueAsString(event), topicEvents, event.getRealmName());
+            } catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                LOG.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    @Override
+    public void onEvent(AdminEvent event, boolean includeRepresentation) {
+        if (topicAdminEvents != null) {
+            try {
+                produceEvent(mapper.writeValueAsString(event), topicAdminEvents, event.getRealmName());
+            } catch (JsonProcessingException | ExecutionException | TimeoutException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                LOG.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        // ignore
+    }
+
     private void populateProducerByRealmMap(Map<String, KafkaRealmConfig> kafkaConfigByRealm,
                                             KafkaProducerFactory factory,
                                             Map<String, Object> kafkaProducerProperties) {
@@ -83,24 +120,6 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
         LOG.debug("Produced to topic: " + recordMetadata.topic());
     }
 
-    @Override
-    public void onEvent(Event event) {
-        final EventType type = event.getType();
-        if (events.contains(type)) {
-            if (USER_DISABLED_BY_TEMPORARY_LOCKOUT.equals(type)) {
-                changeUnlockTimeType(event.getDetails());
-            }
-            try {
-                produceEvent(mapper.writeValueAsString(event), topicEvents, event.getRealmName());
-            } catch (JsonProcessingException | ExecutionException | TimeoutException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (InterruptedException e) {
-                LOG.error(e.getMessage(), e);
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
     private void changeUnlockTimeType(Map<String, String> details) {
         final String notBeforeString = details.get(NOT_BEFORE);
 
@@ -109,24 +128,5 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
 
         final long epochSecond = zonedDateTime.toInstant().getEpochSecond();
         details.put(NOT_BEFORE, Long.toString(epochSecond));
-    }
-
-    @Override
-    public void onEvent(AdminEvent event, boolean includeRepresentation) {
-        if (topicAdminEvents != null) {
-            try {
-                produceEvent(mapper.writeValueAsString(event), topicAdminEvents, event.getRealmName());
-            } catch (JsonProcessingException | ExecutionException | TimeoutException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (InterruptedException e) {
-                LOG.error(e.getMessage(), e);
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    @Override
-    public void close() {
-        // ignore
     }
 }
