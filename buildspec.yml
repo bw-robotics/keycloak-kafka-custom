@@ -6,8 +6,50 @@ phases:
   install:
     runtime-versions:
       java: corretto21
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 381492305859.dkr.ecr.eu-west-1.amazonaws.com
   build:
+    on-failure: ABORT
     commands:
       - echo Deploying Keycloak Kafka Custom jar...
       - echo $SETTINGS > settings.xml
+      - |
+        VERSION=$(sed -n 's|.*<keycloak.version>\(.*\)</keycloak.version>.*|\1|p' pom.xml)
+
+      - PROJECT_NAME=$(basename $CODEBUILD_SOURCE_REPO_URL .git)
+
+      - |
+        # Extract major and minor versions from the branch name
+        export MAJOR_MINOR=$VERSION
+
+        # Define the Parameter Store key for the patch version
+        PARAMETER_KEY="/codebuild/${PROJECT_NAME}_$MAJOR_MINOR/patch"
+
+        # Function to check if a parameter exists in SSM Parameter Store
+        parameter_exists() {
+          aws ssm get-parameter --name "$1" --query "Parameter.Value" --output text 2>/dev/null
+        }
+
+        # Check if the parameter exists and create it if it doesn't
+        if ! parameter_exists "$PARAMETER_KEY"; then
+          echo "Parameter $PARAMETER_KEY does not exist. Initializing patch version to 0."
+          aws ssm put-parameter --name "$PARAMETER_KEY" --value "0" --type "String"
+          CURRENT_PATCH=0
+        else
+          CURRENT_PATCH=$(parameter_exists "$PARAMETER_KEY")
+        fi
+        echo "Current patch version for $MAJOR_MINOR is $CURRENT_PATCH"
+
+
+        # Set the version as an environment variable
+        NEW_PATCH=$((CURRENT_PATCH + 1))
+        export VERSION="$MAJOR_MINOR.$NEW_PATCH"
+        echo "Building version $VERSION"
+        echo "Trying to build docker image: ${REGISTRY}:${VERSION} "
+      - wget --user=$JFROG_USER --password=$JFROG_ACCESS_KEY "https://bwrrepo.jfrog.io/artifactory/default-maven-local/com/bwr/keycloak-kafka/1.2.0/keycloak-kafka-1.2.0-jar-with-dependencies.jar"
+      - docker buildx create --use
+      - docker buildx build --platform linux/amd64,linux/arm64 --push -t ${REGISTRY}:${VERSION} -f Dockerfile .
       - mvn deploy -s settings.xml
+      -
