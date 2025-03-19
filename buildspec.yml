@@ -2,6 +2,9 @@ version: 0.2
 cache:
   paths:
     - '/root/.m2/**/*'
+env:
+  variables:
+    HELM_TAG_PATH: ".image.tag"
 phases:
   install:
     runtime-versions:
@@ -52,4 +55,12 @@ phases:
       - docker buildx create --use
       - docker buildx build --platform linux/amd64,linux/arm64 --push -t ${REGISTRY}:${VERSION} -f Dockerfile .
       - mvn deploy -s settings.xml
-      -
+  post_build:
+    commands:
+      - echo Incrementing patch version...
+      - |
+        if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
+          do-codebuild-common/common/helm_update.sh -t "${HELM_TAG_PATH}" -v "${VERSION}"
+        else 
+          echo "Branch is not master. Skipping deployment..."
+        fi
