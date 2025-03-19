@@ -7,6 +7,7 @@ env:
     HELM_TAG_PATH: ".image.tag"
     HELM_REPO_PATH: "https://github.com/bw-robotics/do-helm-charts.git"
     HELM_VALUES_FILE_PATH: "dev-values.yaml"
+    HELM_DIR_PATH: "infrastructure/keycloak"
   git-credential-helper: yes
 phases:
   install:
@@ -65,7 +66,7 @@ phases:
       - echo Incrementing patch version...
       - |
         if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
-          do-codebuild-common/common/helm_update.sh -t "${HELM_TAG_PATH}" -v "${VERSION}" -f "${HELM_VALUES_FILE_PATH}" -r "${HELM_REPO_PATH}"
+          do-codebuild-common/common/helm_update.sh -t "${HELM_TAG_PATH}" -v "${VERSION}" -f "${HELM_VALUES_FILE_PATH}" -r "${HELM_REPO_PATH}" -d "${HELM_DIR_PATH}"
         else 
           echo "Branch is not master. Skipping deployment..."
         fi
