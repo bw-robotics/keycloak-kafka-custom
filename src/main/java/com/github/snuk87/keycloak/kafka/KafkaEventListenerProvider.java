@@ -105,13 +105,14 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
         kafkaConfigByRealm.forEach((realm, config) -> {
             final Producer<String, String> producer = factory.createProducer(config.getClientId(), config.getBootstrapServers(), kafkaProducerProperties);
             this.producerByRealm.put(realm, producer);
+            LOG.info("Created producer for realm: " + realm);
         });
 
     }
 
     private void produceEvent(String eventAsString, String topic, String realmName)
             throws InterruptedException, ExecutionException, TimeoutException {
-        LOG.debug("Produce to topic: " + topicEvents + " ...");
+        LOG.info("Produce to topic: " + topicEvents + " in realm: " + realmName + "...");
         final Producer<String, String> producer = producerByRealm.get(realmName);
 
         ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
