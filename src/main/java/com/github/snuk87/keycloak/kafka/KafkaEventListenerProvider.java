@@ -114,6 +114,10 @@ public class KafkaEventListenerProvider implements EventListenerProvider {
             throws InterruptedException, ExecutionException, TimeoutException {
         LOG.info("Produce to topic: " + topicEvents + " in realm: " + realmName + "...");
         final Producer<String, String> producer = producerByRealm.get(realmName);
+        if (producer == null) {
+            LOG.warn("No producer found for realm: " + realmName + ". Skipping event...");
+            return;
+        }
 
         ProducerRecord<String, String> record = new ProducerRecord<>(topic, eventAsString);
         Future<RecordMetadata> metaData = producer.send(record);
