@@ -2,10 +2,19 @@ version: 0.2
 cache:
   paths:
     - '/root/.m2/**/*'
+env:
+  variables:
+    HELM_TAG_PATH: ".image.tag"
+    HELM_REPO_PATH: "https://github.com/bw-robotics/do-helm-charts.git"
+    HELM_VALUES_FILE_PATH: "dev-values.yaml"
+    HELM_DIR_PATH: "infrastructure/keycloak"
+  git-credential-helper: yes
 phases:
   install:
     runtime-versions:
       java: corretto21
+    commands:
+      - git clone https://github.com/bw-robotics/do-codebuild-common.git
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
@@ -52,4 +61,12 @@ phases:
       - docker buildx create --use
       - docker buildx build --platform linux/amd64,linux/arm64 --push -t ${REGISTRY}:${VERSION} -f Dockerfile .
       - mvn deploy -s settings.xml
-      -
+  post_build:
+    commands:
+      - echo Incrementing patch version...
+      - |
+        if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
+          do-codebuild-common/common/helm_update.sh -t "${HELM_TAG_PATH}" -v "${VERSION}" -f "${HELM_VALUES_FILE_PATH}" -r "${HELM_REPO_PATH}" -d "${HELM_DIR_PATH}"
+        else 
+          echo "Branch is not master. Skipping deployment..."
+        fi
