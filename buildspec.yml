@@ -72,6 +72,11 @@ phases:
     commands:
       - echo Incrementing patch version...
       - |
+        # Increment the patch version
+        echo "New patch version for $MAJOR_MINOR is $NEW_PATCH"
+        # Store the new patch version back to Parameter Store
+        aws ssm put-parameter --name "$PARAMETER_KEY" --value "$NEW_PATCH" --type "String" --overwrite
+      - |
         if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
           do-codebuild-common/common/helm_update.sh -t "${HELM_TAG_PATH}" -v "${VERSION}" -f "${HELM_VALUES_FILE_PATH}" -r "${HELM_REPO_PATH}" -d "${HELM_DIR_PATH}"
         else 
