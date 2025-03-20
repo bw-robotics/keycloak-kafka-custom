@@ -15,6 +15,13 @@ phases:
       java: corretto21
     commands:
       - git clone https://github.com/bw-robotics/do-codebuild-common.git
+      - |
+        echo "Installing yq..."
+        wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        chmod +x /usr/bin/yq
+        echo "✅ Installed yq... print version"
+        yq --version
+        echo
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
