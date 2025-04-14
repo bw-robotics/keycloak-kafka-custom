@@ -3,11 +3,6 @@ cache:
   paths:
     - '/root/.m2/**/*'
 env:
-  variables:
-    HELM_TAG_PATH: ".image.tag"
-    HELM_REPO_PATH: "https://github.com/bw-robotics/do-helm-charts.git"
-    HELM_VALUES_FILE_PATH: "dev-values.yaml"
-    HELM_DIR_PATH: "infrastructure/keycloak"
   git-credential-helper: yes
 phases:
   install:
@@ -27,50 +22,4 @@ phases:
     commands:
       - echo Deploying Keycloak Kafka Custom jar...
       - echo $SETTINGS > settings.xml
-      - |
-        VERSION=$(sed -n 's|.*<keycloak.version>\(.*\)</keycloak.version>.*|\1|p' pom.xml)
-
-      - PROJECT_NAME=$(basename $CODEBUILD_SOURCE_REPO_URL .git)
-
-      - |
-        # Extract major and minor versions from the branch name
-        export MAJOR_MINOR=$VERSION
-
-        # Define the Parameter Store key for the patch version
-        PARAMETER_KEY="/codebuild/${PROJECT_NAME}_$MAJOR_MINOR/patch"
-
-        # Function to check if a parameter exists in SSM Parameter Store
-        parameter_exists() {
-          aws ssm get-parameter --name "$1" --query "Parameter.Value" --output text 2>/dev/null
-        }
-
-        # Check if the parameter exists and create it if it doesn't
-        if ! parameter_exists "$PARAMETER_KEY"; then
-          echo "Parameter $PARAMETER_KEY does not exist. Initializing patch version to 0."
-          aws ssm put-parameter --name "$PARAMETER_KEY" --value "0" --type "String"
-          CURRENT_PATCH=0
-        else
-          CURRENT_PATCH=$(parameter_exists "$PARAMETER_KEY")
-        fi
-        echo "Current patch version for $MAJOR_MINOR is $CURRENT_PATCH"
-
-
-        # Set the version as an environment variable
-        NEW_PATCH=$((CURRENT_PATCH + 1))
-        export VERSION="$MAJOR_MINOR.$NEW_PATCH"
-        echo "Building version $VERSION"
       - mvn deploy -s settings.xml
-  post_build:
-    commands:
-      - echo Incrementing patch version...
-      - |
-        # Increment the patch version
-        echo "New patch version for $MAJOR_MINOR is $NEW_PATCH"
-        # Store the new patch version back to Parameter Store
-        aws ssm put-parameter --name "$PARAMETER_KEY" --value "$NEW_PATCH" --type "String" --overwrite
-      - |
-        if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
-          do-codebuild-common/common/helm_update.sh -t "${HELM_TAG_PATH}" -v "${VERSION}" -f "${HELM_VALUES_FILE_PATH}" -r "${HELM_REPO_PATH}" -d "${HELM_DIR_PATH}"
-        else 
-          echo "Branch is not master. Skipping deployment..."
-        fi
