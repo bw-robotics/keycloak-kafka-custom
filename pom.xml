@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.bwr</groupId>
 	<artifactId>keycloak-kafka</artifactId>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 
 	<properties>
 		<maven.compiler.source>21</maven.compiler.source>
