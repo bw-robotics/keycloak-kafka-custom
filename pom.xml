@@ -9,7 +9,7 @@
 	<properties>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
-		<keycloak.version>26.7.0</keycloak.version>
+		<keycloak.version>26.6.4</keycloak.version>
 		<kafka.version>3.9.2</kafka.version>
 		<aws-msk-iam-auth.version>2.1.0</aws-msk-iam-auth.version>
 		<fasterxml-jackson-core.version>2.18.2</fasterxml-jackson-core.version>
