@@ -4,14 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.bwr</groupId>
 	<artifactId>keycloak-kafka</artifactId>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 
 	<properties>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<keycloak.version>26.6.4</keycloak.version>
 		<kafka.version>3.9.2</kafka.version>
-		<aws-msk-iam-auth.version>2.1.0</aws-msk-iam-auth.version>
+		<aws-msk-iam-auth.version>2.3.7</aws-msk-iam-auth.version>
 		<fasterxml-jackson-core.version>2.18.2</fasterxml-jackson-core.version>
 		<confluent.version>7.5.0</confluent.version>
 		<junit.version>5.11.0</junit.version>
@@ -62,6 +62,13 @@
 			<groupId>software.amazon.msk</groupId>
 			<artifactId>aws-msk-iam-auth</artifactId>
 			<version>${aws-msk-iam-auth.version}</version>
+			<exclusions>
+				<!-- Keycloak provides the Netty version required by its Vert.x runtime. -->
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
