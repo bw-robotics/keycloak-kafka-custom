@@ -12,7 +12,7 @@
 		<keycloak.version>26.6.4</keycloak.version>
 		<kafka.version>3.9.2</kafka.version>
 		<aws-msk-iam-auth.version>2.3.7</aws-msk-iam-auth.version>
-		<fasterxml-jackson-core.version>2.18.2</fasterxml-jackson-core.version>
+		<fasterxml-jackson-core.version>2.18.9</fasterxml-jackson-core.version>
 		<confluent.version>7.5.0</confluent.version>
 		<junit.version>5.11.0</junit.version>
 		<jboss-logging.version>3.6.1.Final</jboss-logging.version>
