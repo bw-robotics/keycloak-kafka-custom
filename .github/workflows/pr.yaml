@@ -28,8 +28,10 @@ jobs:
           cache: maven
 
       - name: Write settings.xml
+        env:
+          SETTINGS: ${{ secrets.BE_JFROG_SETTINGS }}
         run: |
-          echo "${{ secrets.BE_JFROG_SETTINGS }}" > settings.xml
+          echo "$SETTINGS" > settings.xml
 
       - name: Maven install
         run: mvn install -s settings.xml
