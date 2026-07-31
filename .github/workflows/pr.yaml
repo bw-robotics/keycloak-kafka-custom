@@ -28,6 +28,8 @@ jobs:
           cache: maven
 
       - name: Write settings.xml
+        env:
+          SETTINGS: ${{ secrets.BE_JFROG_SETTINGS }}
         run: |
           echo "$SETTINGS" > settings.xml
 
