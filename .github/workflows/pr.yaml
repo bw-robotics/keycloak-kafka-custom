@@ -29,7 +29,7 @@ jobs:
 
       - name: Write settings.xml
         run: |
-          echo "$SETTINGS" > settings.xml
+          echo "${{ secrets.BE_JFROG_SETTINGS }}" > settings.xml
 
       - name: Maven install
         run: mvn install -s settings.xml
